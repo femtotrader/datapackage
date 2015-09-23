@@ -207,16 +207,17 @@ class TestDatapackage(object):
         self.dpkg.image = "bar.jpg"
         assert self.dpkg.image == "bar.jpg"
 
-    @mocklib.patch('datapackage.compat.urlopen')
-    def test_web_url(self, mock_urlopen):
+    #@mocklib.patch('datapackage.compat.urlopen')
+    #def test_web_url(self, mock_urlopen):
+    def test_web_url(self):
         """Try reading a datapackage from the web"""
 
         # setup the mock for url read
-        with io.open("tests/cpi/datapackage.json", "rb") as fh:
-            metadata = fh.read()
-        mock = mocklib.Mock()
-        mock.read.side_effect = [metadata]
-        mock_urlopen.return_value = mock
+        #with io.open("tests/cpi/datapackage.json", "rb") as fh:
+        #    metadata = fh.read()
+        #mock = mocklib.Mock()
+        #mock.read.side_effect = [metadata]
+        #mock_urlopen.return_value = mock
 
         self.dpkg = datapackage.DataPackage('http://data.okfn.org/data/cpi/')
         assert self.dpkg.title == "Annual Consumer Price Index (CPI)"

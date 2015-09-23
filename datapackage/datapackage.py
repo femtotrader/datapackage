@@ -37,7 +37,7 @@ from .persons import Person
 from .util import (Specification, verify_version, parse_version,
                    format_version, is_local, is_url)
 from . import compat
-
+import requests
 
 class DataPackage(Specification):
     """
@@ -104,7 +104,7 @@ class DataPackage(Specification):
             try:
                 self.SESSION = kwargs['session']
             except KeyError:
-                self.SESSION = None
+                self.SESSION = requests.Session()
             descriptor = self.get_descriptor()
             super(DataPackage, self).__init__(**descriptor)
         else:
@@ -184,20 +184,14 @@ class DataPackage(Specification):
         # -- we don't want to just use os.path.join because otherwise
         # on Windows it will try to create URLs with backslashes
         if is_url(path):
-            if self.SESSION is None:
-                return compat.urlopen(path)
-            else:
-                return self.SESSION.get(path, stream=True)
+            return self.SESSION.get(path, stream=True)
         else:
             if is_local(base):
                 resource_path = os.path.join(base, path)
                 return io.open(resource_path, 'rb')  # Read file in binary mode to mimick behavior of urlopen
             else:
                 resource_path = compat.parse.urljoin(base, path)
-                if self.SESSION is None:
-                    return compat.urlopen(resource_path)  # Do not use os.path.join here since url separators do not change with platform
-                else:
-                    return self.SESSION.get(resource_path, stream=True)
+                return self.SESSION.get(resource_path, stream=True)
 
     @property
     def name(self):
@@ -697,11 +691,13 @@ class DataPackage(Specification):
             # None of the location types were in resource
             raise NotImplementedError('Datapackage currently only supports resource url and path')
 
+        print(resource_file)
         if hasattr(resource_file, 'raw'):
             resource_file = resource_file.raw
         else:
-            resource_file = (line.decode(resource.get('encoding', 'utf-8'))
-                         for line in resource_file)
+            pass
+            #resource_file = (line.decode(resource.get('encoding', 'utf-8'))
+            #             for line in resource_file)
         # We assume CSV so we create the csv file
         reader = compat.csv_reader(resource_file)
         # Throw away the first line (headers)
