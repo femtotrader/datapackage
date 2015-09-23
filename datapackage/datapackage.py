@@ -188,7 +188,7 @@ class DataPackage(Specification):
         else:
             if is_local(base):
                 resource_path = os.path.join(base, path)
-                return io.open(resource_path, 'rb')  # Read file in binary mode to mimick behavior of urlopen
+                return io.open(resource_path)  # Read file in binary mode to mimick behavior of urlopen
             else:
                 resource_path = compat.parse.urljoin(base, path)
                 return self.SESSION.get(resource_path, stream=True)
@@ -596,11 +596,7 @@ class DataPackage(Specification):
         if hasattr(descriptor, 'json'): # requests.models.Response
             return descriptor.json()
         else:
-            str_descriptor = descriptor.read().decode('utf-8') # The spec doesn't seem to say anything about the encoding of the datapackage.json files themselves
-            # Load the descriptor json contents
-            json_descriptor = json.loads(str_descriptor)
-            # Return the descriptor json contents (as the dict json.load returns
-            return json_descriptor
+            return json.load(descriptor)
 
     @property
     def resources(self):
@@ -691,13 +687,8 @@ class DataPackage(Specification):
             # None of the location types were in resource
             raise NotImplementedError('Datapackage currently only supports resource url and path')
 
-        print(resource_file)
         if hasattr(resource_file, 'raw'):
             resource_file = resource_file.raw
-        else:
-            pass
-            #resource_file = (line.decode(resource.get('encoding', 'utf-8'))
-            #             for line in resource_file)
         # We assume CSV so we create the csv file
         reader = compat.csv_reader(resource_file)
         # Throw away the first line (headers)
