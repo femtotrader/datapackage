@@ -632,6 +632,7 @@ class DataPackage(Specification):
                 # the Resource class constructor
                 base = os.path.curdir if 'base' not in self else self.base
                 single_value = self.RESOURCE_CLASS(datapackage_uri=base,
+                                                   session=self.SESSION,
                                                    **single_value)
             else:
                 raise TypeError('{0} type {1} is invalid'.format(

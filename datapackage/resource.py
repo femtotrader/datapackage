@@ -18,31 +18,40 @@ from .schema import Schema
 from .util import (Specification, is_local, is_url, is_mimetype,
                    get_size_from_url)
 from . import compat
-
+import requests
 
 name_regex = re.compile(r"^[0-9A-Za-z-_\.]+$")
 
 
 class Resource(Specification):
 
-    SPECIFICATION = {'url': compat.str,
-                     'path': compat.str,
-                     'data': None,
-                     'name': compat.str,
-                     'format': compat.str,
-                     'mediatype': compat.str,
-                     'encoding': compat.str,
-                     'bytes': int,
-                     'hash': compat.str,
-                     'schema': (dict, Schema),
-                     'sources': list,
-                     'licenses': list}
+    SPECIFICATION = {
+        'url': compat.str,
+        'path': compat.str,
+        'data': None,
+        'name': compat.str,
+        'format': compat.str,
+        'mediatype': compat.str,
+        'encoding': compat.str,
+        'bytes': int,
+        'hash': compat.str,
+        'schema': (dict, Schema),
+        'sources': list,
+        'licenses': list,
+        'session': requests.Session
+    }
     REQUIRED = (('url', 'path', 'data'),)
-    SERIALIZE_EXCLUDES = ('datapackage_uri', 'is_local')
+    SERIALIZE_EXCLUDES = ('datapackage_uri', 'is_local', 'session')
+
+    SESSION = None
 
     def __init__(self, *args, **kwargs):
         self.datapackage_uri = kwargs.pop('datapackage_uri', os.path.curdir)
         self.is_local = is_local(self.datapackage_uri)
+        try:
+            self.SESSION = kwargs['session']
+        except KeyError:
+            self.SESSION = requests.Session()
         super(Resource, self).__init__(self, *args, **kwargs)
 
     def _open(self, mode):
@@ -52,6 +61,7 @@ class Resource(Specification):
             if mode not in ('r', 'rb'):
                 raise ValueError('urls can only be opened read-only')
             return compat.urlopen(self.fullpath)
+            return self.SESSION.get(self.fullpath)
 
     @property
     def datapackage_uri(self):
@@ -285,7 +295,7 @@ class Resource(Specification):
         """Compute the size of the file specified by the url"""
         if not self.url:
             raise ValueError("url to file is not specified")
-        return get_size_from_url(self.url)
+        return get_size_from_url(self.url, session=self.SESSION)
 
     def update_bytes(self, verify=True):
         """Re-compute the size of the resource, using either the inline data,
