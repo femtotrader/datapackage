@@ -60,7 +60,6 @@ class Resource(Specification):
         else:
             if mode not in ('r', 'rb'):
                 raise ValueError('urls can only be opened read-only')
-            return compat.urlopen(self.fullpath)
             return self.SESSION.get(self.fullpath)
 
     @property
