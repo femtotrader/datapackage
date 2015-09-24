@@ -273,7 +273,9 @@ class TestDatapackage(object):
 
     def test_path_bytes(self):
         """Checks that the size is computed correctly from the path"""
-        assert self.resource._path_bytes() == self.resource.bytes
+        actual = self.resource._path_bytes()
+        expected = self.resource.bytes
+        assert actual == expected, "%d != %d" % (actual, expected)
 
     @raises(ValueError)
     def test_path_bytes_no_path(self):
@@ -311,14 +313,18 @@ class TestDatapackage(object):
 
         """
         self.resource.update_bytes()
-        assert self.resource.bytes == 14
+        actual = self.resource.bytes
+        expected = 14
+        assert actual == expected, "%d != %d" % (actual, expected)
 
     def test_compute_bytes_from_path(self):
         """Test computing the size from the file given by the path"""
         self.resource.data = None
         del self.resource['bytes']
         self.resource.update_bytes()
-        assert self.resource.bytes == 14
+        actual = self.resource.bytes
+        expected = 14
+        assert actual == expected, "%d != %d" % (actual, expected)
 
     def test_update_bytes_path_unchanged(self):
         """Test that updating the size from the file given by the path does
@@ -327,7 +333,9 @@ class TestDatapackage(object):
         """
         self.resource.data = None
         self.resource.update_bytes()
-        assert self.resource.bytes == 14
+        actual = self.resource.bytes
+        expected = 14
+        assert actual == expected, "%d != %d" % (actual, expected)
 
     @mocklib.patch('datapackage.compat.urlopen')
     def test_compute_bytes_from_url(self, mock_urlopen):
@@ -337,7 +345,9 @@ class TestDatapackage(object):
         self.resource.path = None
         del self.resource['bytes']
         self.resource.update_bytes()
-        assert self.resource.bytes == 14
+        actual = self.resource.bytes
+        expected = 14
+        assert actual == expected, "%d != %d" % (actual, expected)
 
     @mocklib.patch('datapackage.compat.urlopen')
     def test_update_bytes_url_unchanged(self, mock_urlopen):
